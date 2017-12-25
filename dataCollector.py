@@ -2,6 +2,7 @@ import json
 import sensor
 import time
 import os
+import threading
 
 SENSOR_PATHS = dict()
 SENSOR_PATHS["DG_Lead"] = "28-00000529cf95"
@@ -60,73 +61,117 @@ class datalogger:
             json.dump(extData, file)
             self.numLogLines += 1
 
+def clearScreen():
+    print(chr(27) + "[2J")
 
 def getW1Path(deviceID):
     return "/sys/bus/w1/devices/" + deviceID + "/w1_slave"
 
-sensors = dict()
-testSensorPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_device", "w1_slave")
-#sensors["HeatResorvoir0"] = sensor.ds1820("/sys/bus/w1/devices/" + str("bla") + "/w1_slave")
-sensors["HeatResorvoir0"] = sensor.ds1820(testSensorPath)
-sensors["HeatResorvoir1"] = sensor.ds1820(testSensorPath)
-sensors["HeatResorvoir2"] = sensor.ds1820(testSensorPath)
-sensors["HeatResorvoir3"] = sensor.ds1820(testSensorPath)
-sensors["SolarHeatExchangeLead"] = sensor.ds1820(testSensorPath)
-sensors["SolarHeatExchangeReturn"] = sensor.ds1820(testSensorPath)
-sensors["HeatResorvoir2a"] = sensor.ds1820(testSensorPath)
-sensors["HeatResorvoirReturnBoiler"] = sensor.ds1820(testSensorPath)
+class DataCollector(threading.Thread):
+    lock = threading.Lock()
 
-for k in SENSOR_PATHS.keys():
-    sensors[k] = sensor.ds1820(getW1Path(SENSOR_PATHS[k]))
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.endRequest = False
+        self.sensors = dict()
+        testSensorPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_device", "w1_slave")
+        self.sensors["HeatResorvoir0"] = sensor.ds1820(testSensorPath)
+        self.sensors["HeatResorvoir1"] = sensor.ds1820(testSensorPath)
+        self.sensors["HeatResorvoir2"] = sensor.ds1820(testSensorPath)
+        self.sensors["HeatResorvoir3"] = sensor.ds1820(testSensorPath)
+        self.sensors["SolarHeatExchangeLead"] = sensor.ds1820(testSensorPath)
+        self.sensors["SolarHeatExchangeReturn"] = sensor.ds1820(testSensorPath)
+        self.sensors["HeatResorvoir2a"] = sensor.ds1820(testSensorPath)
+        self.sensors["HeatResorvoirReturnBoiler"] = sensor.ds1820(testSensorPath)
 
-sensors["Ambient"]= sensor.ds1820(testSensorPath)
-sensors["Outside"] = sensor.ds1820(testSensorPath)
+        for k in SENSOR_PATHS.keys():
+            self.sensors[k] = sensor.ds1820(getW1Path(SENSOR_PATHS[k]))
 
-sensors["Collector"] = sensor.ds1820(testSensorPath)
+        self.sensors["Ambient"]= sensor.ds1820(testSensorPath)
+        self.sensors["Outside"] = sensor.ds1820(testSensorPath)
 
-solarController = hysteresis(20.0, 15.0)
+        self.sensors["Collector"] = sensor.ds1820(testSensorPath)
 
-with datalogger('/tmp/test.log') as dl:
+
+        DataCollector.lock.acquire()
+        self.data = dict()
+        DataCollector.lock.release()
+
+
+    def run(self):
+        cont = True
+
+        while cont:
+
+
+            try:
+                start = time.time()
+
+                # query sensors
+                for k in self.sensors.keys():
+                    self.sensors[k].querySensor()
+
+                # write data
+                data = dict()
+                DataCollector.lock.acquire()
+                for k in self.sensors.keys():
+                    self.data[k] = self.sensors[k].getTimeValue()
+                DataCollector.lock.release()
+
+                duration = time.time() - start
+                time.sleep(30.0 - duration)
+
+            except:
+                raise
+
+            DataCollector.lock.acquire()
+            cont = (self.endRequest == False)
+            DataCollector.lock.release()
+
+
+    def getCurrentData(self):
+        DataCollector.lock.acquire()
+        ret = self.data
+        DataCollector.lock.release()
+        return ret
+
+    def stopRequest(self):
+        DataCollector.lock.acquire()
+        self.endRequest = True
+        DataCollector.lock.release()
+
+
+
+
+
+def main():
+    dc = DataCollector()
+    dc.start()
+
+
     while True:
         try:
-            start = time.time()
+            clearScreen()
+            data = dc.getCurrentData()
+            for k in data.keys():
+                print(k + ": \t" + str(data[k]["value"]) + "°C")
 
-            # query sensors
-            for k in sensors.keys():
-                sensors[k].querySensor()
-
-            # write data
-            data = dict()
-            for k in sensors.keys():
-                data[k] = sensors[k].getTimeValue()
-
-
-
-
-            # do actions
-            #   activate solar pump
-            data["solarPump"] = solarController.check(sensors["Collector"].getValue())
-            data["boilerPump"] = False
-
-            #   activate boiler pump
-
-
-
-
-
-            # write to logfile
-            dl.log(data)
-
-            print("Kessel Vorlauf: " + str(data["Heater_Lead"]))
-
-            duration = time.time() - start
-            time.sleep(30.0 - duration)
+            time.sleep(1)
 
         except KeyboardInterrupt:
+            dc.stopRequest()
             break
-
         except:
             raise
+
+
+    dc.join()
+
+#solarController = hysteresis(20.0, 15.0)
+
+if __name__ == "__main__":
+    main()
+
 
 
 
