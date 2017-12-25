@@ -37,29 +37,26 @@ class hysteresis:
     def getState(self):
         return self.state
 
-class datalogger:
+
+class DataCollectorCallback:
+    def onData(self, data):
+        raise NotImplementedError
+
+class DataLogging(DataCollectorCallback):
     def __init__(self, path):
+        DataCollectorCallback.__init__()
         self.path = path
-        self.numLogLines = 0
-        with open(path, 'w') as file:
-            file.write("{'loggingdata':[")
 
-    def __enter__(self):
-        return self
+    def setPath(self, path):
+        self.path = path
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def onData(self, data):
+        extData = {'timestamp': time.time(), 'data': data}
         with open(self.path, 'a') as file:
-            file.write("]}")
-
-    def log(self, d):
-        extData = {'ts': time.time(), 'data': d}
-        print(extData)
-        with open(self.path, 'a') as file:
-            if self.numLogLines > 0:
-                file.write(",")
-
             json.dump(extData, file)
-            self.numLogLines += 1
+            file.write("\n")
+
+
 
 def clearScreen():
     print(chr(27) + "[2J")
@@ -73,6 +70,8 @@ class DataCollector(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.endRequest = False
+        self.callbacks = []
+
         self.sensors = dict()
         testSensorPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_device", "w1_slave")
         self.sensors["HeatResorvoir0"] = sensor.ds1820(testSensorPath)
@@ -118,6 +117,9 @@ class DataCollector(threading.Thread):
                     self.data[k] = self.sensors[k].getTimeValue()
                 DataCollector.lock.release()
 
+                for cb in self.callbacks:
+                    cb.onData(self.data)
+
                 duration = time.time() - start
                 time.sleep(30.0 - duration)
 
@@ -140,12 +142,18 @@ class DataCollector(threading.Thread):
         self.endRequest = True
         DataCollector.lock.release()
 
+    def addCallback(self, cb):
+        self.callbacks.append(cb)
+
+
 
 
 
 
 def main():
     dc = DataCollector()
+    datalogger = DataLogging("/tmp/logger2.log")
+    dc.addCallback(datalogger)
     dc.start()
 
 
@@ -160,12 +168,14 @@ def main():
 
         except KeyboardInterrupt:
             dc.stopRequest()
+            print("Stop might take up to 30s. Please wait...")
             break
         except:
             raise
 
 
     dc.join()
+    print("Application ended.")
 
 #solarController = hysteresis(20.0, 15.0)
 
