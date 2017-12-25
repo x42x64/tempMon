@@ -1,6 +1,7 @@
 import json
 import sensor
 import time
+import os
 
 SENSOR_PATHS = dict()
 SENSOR_PATHS["DG_Lead"] = "28-00000529cf95"
@@ -64,24 +65,24 @@ def getW1Path(deviceID):
     return "/sys/bus/w1/devices/" + deviceID + "/w1_slave"
 
 sensors = dict()
-
+testSensorPath = os.path.join([os.path.dirname(os.path.realpath(__file__)), "test_device", "w1_slave"])
 #sensors["HeatResorvoir0"] = sensor.ds1820("/sys/bus/w1/devices/" + str("bla") + "/w1_slave")
-sensors["HeatResorvoir0"] = sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
-sensors["HeatResorvoir1"] = sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
-sensors["HeatResorvoir2"] = sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
-sensors["HeatResorvoir3"] = sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
-sensors["SolarHeatExchangeLead"] = sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
-sensors["SolarHeatExchangeReturn"] = sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
-sensors["HeatResorvoir2a"] = sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
-sensors["HeatResorvoirReturnBoiler"] = sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
+sensors["HeatResorvoir0"] = sensor.ds1820(testSensorPath)
+sensors["HeatResorvoir1"] = sensor.ds1820(testSensorPath)
+sensors["HeatResorvoir2"] = sensor.ds1820(testSensorPath)
+sensors["HeatResorvoir3"] = sensor.ds1820(testSensorPath)
+sensors["SolarHeatExchangeLead"] = sensor.ds1820(testSensorPath)
+sensors["SolarHeatExchangeReturn"] = sensor.ds1820(testSensorPath)
+sensors["HeatResorvoir2a"] = sensor.ds1820(testSensorPath)
+sensors["HeatResorvoirReturnBoiler"] = sensor.ds1820(testSensorPath)
 
 for k in SENSOR_PATHS.keys():
     sensors[k] = sensor.ds1820(getW1Path(SENSOR_PATHS[k]))
 
-sensors["Ambient"]= sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
-sensors["Outside"] = sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
+sensors["Ambient"]= sensor.ds1820(testSensorPath)
+sensors["Outside"] = sensor.ds1820(testSensorPath)
 
-sensors["Collector"] = sensor.ds1820("/home/jan/projects/heizung/test_device" + "/w1_slave")
+sensors["Collector"] = sensor.ds1820(testSensorPath)
 
 solarController = hysteresis(20.0, 15.0)
 
