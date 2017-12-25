@@ -41,13 +41,13 @@ class hysteresis:
 class DataCollectorCallback:
     def __init__(self):
         pass
-    
+
     def onData(self, data):
         raise NotImplementedError
 
 class DataLogging(DataCollectorCallback):
     def __init__(self, path):
-        DataCollectorCallback.__init__()
+        DataCollectorCallback.__init__(self)
         self.path = path
 
     def setPath(self, path):
