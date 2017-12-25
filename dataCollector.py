@@ -65,7 +65,7 @@ def getW1Path(deviceID):
     return "/sys/bus/w1/devices/" + deviceID + "/w1_slave"
 
 sensors = dict()
-testSensorPath = os.path.join([os.path.dirname(os.path.realpath(__file__)), "test_device", "w1_slave"])
+testSensorPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_device", "w1_slave")
 #sensors["HeatResorvoir0"] = sensor.ds1820("/sys/bus/w1/devices/" + str("bla") + "/w1_slave")
 sensors["HeatResorvoir0"] = sensor.ds1820(testSensorPath)
 sensors["HeatResorvoir1"] = sensor.ds1820(testSensorPath)
@@ -117,7 +117,7 @@ with datalogger('/tmp/test.log') as dl:
             # write to logfile
             dl.log(data)
 
-            print(data)
+            print("Kessel Vorlauf: " + str(data["Heater_Lead"]))
 
             duration = time.time() - start
             time.sleep(30.0 - duration)
@@ -127,5 +127,6 @@ with datalogger('/tmp/test.log') as dl:
 
         except:
             raise
+
 
 
