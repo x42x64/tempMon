@@ -1,0 +1,12 @@
+ID	#Sensor von Master aus gezählt	Bezeichnung
+28-00000529cf95	1	Vorlauf DG
+28-0000052997b1	2	Rücklauf DG
+28-000005298431	3	Vorlauf EG
+28-000005298f89	4	Rücklauf EG
+28-0000052972cb	5	Vorlauf Boiler
+28-00000529790f	6	Rücklauf Boiler
+28-00000529489e	7	Vorlauf KG
+28-00000529685d	8	Rücklauf KG
+28-000005293bb5	9	Rücklauf Kessel
+28-00000529aaec	10	Vorlauf Kessel
+
