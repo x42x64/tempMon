@@ -36,8 +36,13 @@ xhttp.onreadystatechange = function() {
     }
 };
 
-setInterval(function(){ xhttp.open("GET", "http://192.168.178.54:8081", true);xhttp.send(); }, 15000);
+function querySensors(){ 
+    xhttp.open("GET", "http://192.168.178.54:8081", true);
+    xhttp.send(); 
+}
 
+setInterval(querySensors, 15000);
+querySensors();
 
 
 </script>
