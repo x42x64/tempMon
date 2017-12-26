@@ -1,6 +1,7 @@
 # tempMon
 
 ## Setup Raspberry Pi
+### One Wire Interface
 Sources: 
 * http://www.netzmafia.de/skripten/hardware/RasPi/Projekt-Onewire/index.html, 
 * https://www.raspberrypi.org/forums/viewtopic.php?f=44&t=65137&start=50#p1185342
@@ -27,3 +28,23 @@ dtoverlay=w1-gpio,gpiopin=17
 ```
 
 Reboot!
+
+### RAM Disk
+Sources:
+* http://www.kriwanek.de/index.php/de/raspberry-pi/265-ram-disk-auf-raspberry-pi-einrichten
+
+Create a folder:
+```
+mkdir /mnt/ramdsk
+```
+
+Edit fstab:
+```
+# /etc/fstab
+tmpfs           /mnt/ramdsk     tmpfs   nodev,nosuid,size=128M 0 0
+```
+
+Remount:
+```
+sudo mount -a
+```
