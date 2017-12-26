@@ -1,6 +1,6 @@
 #!/bin/bash
 shopt -s extglob
-LOGGER_DIR=/tmp/logging/logger
+LOGGER_DIR=/mnt/ramdsk/logger
 
 cd $LOGGER_DIR
 
