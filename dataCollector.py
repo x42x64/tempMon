@@ -6,6 +6,15 @@ import threading
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+if "LOGGER_IP" in os.environ.keys():
+    HTTP_IP = os.environ["LOGGER_IP"]
+else:
+    HTTP_IP = "127.0.0.1"
+
+HTTP_PORT = 8081
+
+
+
 SENSOR_PATHS = dict()
 SENSOR_PATHS["DG_Lead"] = "28-00000529cf95"
 SENSOR_PATHS["DG_Return"] = "28-0000052997b1"
@@ -61,13 +70,28 @@ class DataLogging(DataCollectorCallback):
             json.dump(extData, file)
             file.write("\n")
 
+class ConsoleDataVisz(DataCollectorCallback):
+    def __init__(self):
+        DataCollectorCallback.__init__(self)
+
+    def onData(self, data):
+        clearScreen()
+        print(time.strftime("%H:%M:%S"))
+        print("----------------------")
+        for k in sorted(data.keys()):
+            print('%-30s%10f °C' % (k, data[k]["value"]))
+            #print(k + ": \t" + str() + "°C")
+
+
 class httpProvider(threading.Thread):
     dc = None
     lock = threading.Lock()
 
-    def __init__(self, dataCollector):
+    def __init__(self, dataCollector, ip, port):
         threading.Thread.__init__(self)
         self.endRequest = False
+        self.ip = ip
+        self.port = port
         httpProvider.dc = dataCollector
 
 
@@ -95,7 +119,7 @@ class httpProvider(threading.Thread):
 
         # Server settings
         # Choose port 8080, for port 80, which is normally used for a http server, you need root access
-        server_address = ('127.0.0.1', 8081)
+        server_address = (self.ip, self.port)
         self.httpd = HTTPServer(server_address, httpProvider.httpServer_RequestHandler)
         print('running server...')
 
@@ -130,8 +154,10 @@ class DataCollector(threading.Thread):
         self.sensors["HeatResorvoir2a"] = sensor.ds1820(testSensorPath)
         self.sensors["HeatResorvoirReturnBoiler"] = sensor.ds1820(testSensorPath)
 
-        for k in SENSOR_PATHS.keys():
-            self.sensors[k] = sensor.ds1820(getW1Path(SENSOR_PATHS[k]))
+        # Only use real sensors if HTTP Server is not on loopback
+        if HTTP_IP != "127.0.0.1":
+            for k in SENSOR_PATHS.keys():
+                self.sensors[k] = sensor.ds1820(getW1Path(SENSOR_PATHS[k]))
 
         self.sensors["Ambient"]= sensor.ds1820(testSensorPath)
         self.sensors["Outside"] = sensor.ds1820(testSensorPath)
@@ -199,20 +225,17 @@ class DataCollector(threading.Thread):
 
 def main():
     dc = DataCollector()
-    httpd = httpProvider(dc)
+    httpd = httpProvider(dc, HTTP_IP, HTTP_PORT)
     datalogger = DataLogging("/tmp/logger2.log")
+    visz = ConsoleDataVisz()
     dc.addCallback(datalogger)
+    dc.addCallback(visz)
     dc.start()
     httpd.start()
 
 
     while True:
         try:
-            #clearScreen()
-            data = dc.getCurrentData()
-            #for k in data.keys():
-            #    print(k + ": \t" + str(data[k]["value"]) + "°C")
-
             time.sleep(1)
 
         except KeyboardInterrupt:
