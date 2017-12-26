@@ -10,3 +10,10 @@ ID	#Sensor von Master aus gezählt	Bezeichnung
 28-000005293bb5	9	Rücklauf Kessel
 28-00000529aaec	10	Vorlauf Kessel
 
+28-0000052999e9	1	Boiler oben
+28-00000529d886	2	Boiler mitte oben
+28-00000529668e	3	Boiler mitte unten
+28-00000529829d	4	Boiler unten
+28-0000051af834	5	Wärmetauscher Vorlauf(?)
+28-0000052930f4	6	Wärmetauscher Rücklauf(?)
+
