@@ -33,6 +33,14 @@ SENSOR_PATHS["DG_Lead"] = "28-00000529cf95"
 SENSOR_PATHS["Heater_Lead"] = "28-00000529aaec"
 SENSOR_PATHS["Heater_Return"] = "28-000005293bb5"
 
+# second stub
+SENSOR_PATHS["Heat_Resorvoir0"] = "28-0000052999e9"
+SENSOR_PATHS["Heat_Resorvoir1"] = "28-00000529d886"
+SENSOR_PATHS["Heat_Resorvoir2"] = "28-00000529668e"
+SENSOR_PATHS["Heat_Resorvoir3"] = "28-00000529829d"
+SENSOR_PATHS["SolarHeatExchangeLead"] = "28-0000051af834"
+SENSOR_PATHS["SolarHeatExchangeReturn"] = "28-0000052930f4"
+
 class hysteresis:
     def __init__(self, upper, lower):
         self.state = False
@@ -157,12 +165,6 @@ class DataCollector(threading.Thread):
 
         self.sensors = dict()
         testSensorPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_device", "w1_slave")
-        self.sensors["HeatResorvoir0"] = sensor.ds1820(testSensorPath)
-        self.sensors["HeatResorvoir1"] = sensor.ds1820(testSensorPath)
-        self.sensors["HeatResorvoir2"] = sensor.ds1820(testSensorPath)
-        self.sensors["HeatResorvoir3"] = sensor.ds1820(testSensorPath)
-        self.sensors["SolarHeatExchangeLead"] = sensor.ds1820(testSensorPath)
-        self.sensors["SolarHeatExchangeReturn"] = sensor.ds1820(testSensorPath)
         self.sensors["HeatResorvoir2a"] = sensor.ds1820(testSensorPath)
         self.sensors["HeatResorvoirReturnBoiler"] = sensor.ds1820(testSensorPath)
 
