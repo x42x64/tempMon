@@ -72,7 +72,7 @@ class DataLogging(DataCollectorCallback):
 
     def updatePath(self):
         filename = datetime.datetime.utcnow().strftime("%Y_%m_%d_%H0000Z.log")
-        self.filepath = os.path.join(self.path, filename)
+        self.filepath = os.path.join(self.basepath, filename)
 
 
     def onData(self, data):
