@@ -122,7 +122,10 @@ class httpProvider(threading.Thread):
             self.send_response(200)
 
             # Send headers
-            self.send_header('Content-type', 'text/html')
+            self.send_header('Content-type', 'application/json')
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Expose-Headers", "Access-Control-Allow-Origin")
+            self.send_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
             self.end_headers()
 
             # Send message back to client
