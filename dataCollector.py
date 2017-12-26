@@ -130,8 +130,8 @@ class DataCollector(threading.Thread):
         self.sensors["HeatResorvoir2a"] = sensor.ds1820(testSensorPath)
         self.sensors["HeatResorvoirReturnBoiler"] = sensor.ds1820(testSensorPath)
 
-        #for k in SENSOR_PATHS.keys():
-        #    self.sensors[k] = sensor.ds1820(getW1Path(SENSOR_PATHS[k]))
+        for k in SENSOR_PATHS.keys():
+            self.sensors[k] = sensor.ds1820(getW1Path(SENSOR_PATHS[k]))
 
         self.sensors["Ambient"]= sensor.ds1820(testSensorPath)
         self.sensors["Outside"] = sensor.ds1820(testSensorPath)
