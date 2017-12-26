@@ -1,3 +1,4 @@
+import datetime
 import json
 import sensor
 import time
@@ -12,6 +13,10 @@ else:
     HTTP_IP = "127.0.0.1"
 
 HTTP_PORT = 8081
+
+LOGGER_DIR = None
+if "LOGGER_DIR" in os.environ.keys():
+    LOGGER_DIR = os.environ["LOGGER_DIR"]
 
 
 
@@ -59,14 +64,21 @@ class DataCollectorCallback:
 class DataLogging(DataCollectorCallback):
     def __init__(self, path):
         DataCollectorCallback.__init__(self)
+        self.basepath = path
+        self.updatePath()
+
+    def setBasePath(self, path):
         self.path = path
 
-    def setPath(self, path):
-        self.path = path
+    def updatePath(self):
+        filename = datetime.datetime.utcnow().strftime("%Y_%m_%d_%H0000Z.log")
+        self.filepath = os.path.join(self.path, filename)
+
 
     def onData(self, data):
+        self.updatePath()
         extData = {'timestamp': time.time(), 'data': data}
-        with open(self.path, 'a') as file:
+        with open(self.filepath, 'a') as file:
             json.dump(extData, file)
             file.write("\n")
 
@@ -226,9 +238,12 @@ class DataCollector(threading.Thread):
 def main():
     dc = DataCollector()
     httpd = httpProvider(dc, HTTP_IP, HTTP_PORT)
-    datalogger = DataLogging("/tmp/logger2.log")
+
+    if LOGGER_DIR:
+        datalogger = DataLogging(LOGGER_DIR)
+        dc.addCallback(datalogger)
+
     visz = ConsoleDataVisz()
-    dc.addCallback(datalogger)
     dc.addCallback(visz)
     dc.start()
     httpd.start()
