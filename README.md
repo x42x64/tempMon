@@ -48,3 +48,14 @@ Remount:
 ```
 sudo mount -a
 ```
+
+### Create cronjob to move data from ramdisk to network drive
+Create a cronjob which should be run as root:
+```
+sudo crontab -e
+```
+
+Actual cronjob: Run script at minute 12 every second hour.
+```
+12 */2 * * * /home/pi/projects/heizung/mv2loggingstorage.sh
+```
