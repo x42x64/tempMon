@@ -23,7 +23,7 @@ class sensor:
 class ds1820(sensor):
 
     def __init__(self, path):
-        super(sensor, self).__init__()
+        sensor.__init__(self)
         self.path = path
 
     def getPath(self):
@@ -31,14 +31,19 @@ class ds1820(sensor):
 
     def querySensor(self):
 
-        with open(str(self.path)) as file:
-            filecontent = file.read()
+        try:
 
-            # Temperaturwerte auslesen und konvertieren
-            stringvalue = filecontent.split("\n")[1].split(" ")[9]
-            self.value = float(stringvalue[2:]) / 1000.0
+            with open(str(self.path)) as file:
+                filecontent = file.read()
+    
+                # Temperaturwerte auslesen und konvertieren
+                stringvalue = filecontent.split("\n")[1].split(" ")[9]
+                self.value = float(stringvalue[2:]) / 1000.0
 
-            self.ts = time.time()
+                self.ts = time.time()
+
+        except:
+            print("Could not read sensor " + self.path)
 
 
 
