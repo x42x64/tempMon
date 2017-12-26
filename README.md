@@ -56,6 +56,7 @@ sudo crontab -e
 ```
 
 Actual cronjob: Run script at minute 12 every second hour.
+See also: https://crontab.guru/#12_*/2_*_*_*
 ```
 12 */2 * * * /home/pi/projects/heizung/mv2loggingstorage.sh
 ```
