@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Heizung Dashboard</h1>
+<p id="table"></p>
+
+<script>
+
+var xhttp = new XMLHttpRequest();
+xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+       // Typical action to be performed when the document is ready:
+       temperatureObj = JSON.parse(xhttp.responseText);
+       
+       // sort by key
+       var sortedKeys = [];
+       for(var key in temperatureObj) {
+           sortedKeys[sortedKeys.length] = key;
+       }
+       sortedKeys.sort();
+
+       var tbl_active = "<table>";
+       var tbl_inactive = "<table>";
+       for (var x in sortedKeys)
+       {
+            if (temperatureObj[sortedKeys[x]].value <= -255) {
+                tbl_inactive += "<tr><td>" + sortedKeys[x] + "</td><td>" + temperatureObj[sortedKeys[x]].value + "°C" + "</td></tr>";
+            } else {
+                tbl_active += "<tr><td>" + sortedKeys[x] + "</td><td>" + temperatureObj[sortedKeys[x]].value + "°C" + "</td></tr>";
+            }  
+       }
+       tbl_active += "</table>";
+       tbl_inactive += "</table>";
+       document.getElementById("table").innerHTML = tbl_active + tbl_inactive;
+    }
+};
+
+setInterval(function(){ xhttp.open("GET", "http://192.168.178.54:8081", true);xhttp.send(); }, 15000);
+
+
+
+</script>
+
+</body>
+</html>
