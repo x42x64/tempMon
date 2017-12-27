@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>Heizung Dashboard</title>
+	</head>
 <body>
 
 <h1>Heizung Dashboard</h1>
-<p id="table"></p>
-
+<p id="tableActive"></p>
+<p><img src="graphHeatResorvoir.png" /></p>
+<p id="tableInactive"></p>
 <script>
 
 var xhttp = new XMLHttpRequest();
@@ -32,7 +37,8 @@ xhttp.onreadystatechange = function() {
        }
        tbl_active += "</table>";
        tbl_inactive += "</table>";
-       document.getElementById("table").innerHTML = tbl_active + tbl_inactive;
+       document.getElementById("tableActive").innerHTML = tbl_active;
+       document.getElementById("tableInactive").innerHTML = tbl_inactive;
     }
 };
 
