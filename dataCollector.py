@@ -5,7 +5,12 @@ import time
 import os
 import threading
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import httpProvider
+import dataLogger
+import consoleViszualization
+import imageCreator
+
+
 
 if "LOGGER_IP" in os.environ.keys():
     HTTP_IP = os.environ["LOGGER_IP"]
@@ -62,98 +67,6 @@ class hysteresis:
         return self.state
 
 
-class DataCollectorCallback:
-    def __init__(self):
-        pass
-
-    def onData(self, data):
-        raise NotImplementedError
-
-class DataLogging(DataCollectorCallback):
-    def __init__(self, path):
-        DataCollectorCallback.__init__(self)
-        self.basepath = path
-        self.updatePath()
-
-    def setBasePath(self, path):
-        self.path = path
-
-    def updatePath(self):
-        filename = datetime.datetime.utcnow().strftime("%Y_%m_%d_%H0000Z.log")
-        self.filepath = os.path.join(self.basepath, filename)
-
-
-    def onData(self, data):
-        self.updatePath()
-        extData = {'timestamp': time.time(), 'data': data}
-        with open(self.filepath, 'a') as file:
-            json.dump(extData, file)
-            file.write("\n")
-
-class ConsoleDataVisz(DataCollectorCallback):
-    def __init__(self):
-        DataCollectorCallback.__init__(self)
-
-    def onData(self, data):
-        clearScreen()
-        print(time.strftime("%H:%M:%S"))
-        print("----------------------")
-        for k in sorted(data.keys()):
-            print('%-30s%10f °C' % (k, data[k]["value"]))
-            #print(k + ": \t" + str() + "°C")
-
-
-class httpProvider(threading.Thread):
-    dc = None
-    lock = threading.Lock()
-
-    def __init__(self, dataCollector, ip, port):
-        threading.Thread.__init__(self)
-        self.endRequest = False
-        self.ip = ip
-        self.port = port
-        httpProvider.dc = dataCollector
-
-
-    class httpServer_RequestHandler(BaseHTTPRequestHandler):
-        # GET
-        def do_GET(self):
-            # Send response status code
-            self.send_response(200)
-
-            # Send headers
-            self.send_header('Content-type', 'application/json')
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Access-Control-Expose-Headers", "Access-Control-Allow-Origin")
-            self.send_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-            self.end_headers()
-
-            # Send message back to client
-            message = json.dumps(httpProvider.dc.getCurrentData())
-            # Write content as utf-8 data
-            self.wfile.write(bytes(message, "utf8"))
-            return
-
-    def stopRequest(self):
-        self.httpd.shutdown()
-
-    def run(self):
-        print('starting server...')
-
-        # Server settings
-        # Choose port 8080, for port 80, which is normally used for a http server, you need root access
-        server_address = (self.ip, self.port)
-        self.httpd = HTTPServer(server_address, httpProvider.httpServer_RequestHandler)
-        print('running server...')
-
-        try:
-            self.httpd.serve_forever()
-        finally:
-            self.httpd.server_close()
-
-
-def clearScreen():
-    print(chr(27) + "[2J")
 
 def getW1Path(deviceID):
     return "/sys/bus/w1/devices/" + deviceID + "/w1_slave"
@@ -170,16 +83,16 @@ class DataCollector(threading.Thread):
         testSensorPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_device", "w1_slave")
         self.sensors["HeatResorvoir2a"] = sensor.ds1820(testSensorPath)
         self.sensors["HeatResorvoirReturnBoiler"] = sensor.ds1820(testSensorPath)
+        self.sensors["Ambient"]= sensor.ds1820(testSensorPath)
+        self.sensors["Outside"] = sensor.ds1820(testSensorPath)
+        self.sensors["Collector"] = sensor.ds1820(testSensorPath)
 
         # Only use real sensors if HTTP Server is not on loopback
         if HTTP_IP != "127.0.0.1":
             for k in SENSOR_PATHS.keys():
                 self.sensors[k] = sensor.ds1820(getW1Path(SENSOR_PATHS[k]))
 
-        self.sensors["Ambient"]= sensor.ds1820(testSensorPath)
-        self.sensors["Outside"] = sensor.ds1820(testSensorPath)
 
-        self.sensors["Collector"] = sensor.ds1820(testSensorPath)
 
 
         DataCollector.lock.acquire()
@@ -242,14 +155,18 @@ class DataCollector(threading.Thread):
 
 def main():
     dc = DataCollector()
-    httpd = httpProvider(dc, HTTP_IP, HTTP_PORT)
+    httpd = httpProvider.HttpProvider(dc, HTTP_IP, HTTP_PORT)
 
     if LOGGER_DIR:
-        datalogger = DataLogging(LOGGER_DIR)
+        datalogger = dataLogger.DataLogging(LOGGER_DIR)
         dc.addCallback(datalogger)
 
-    visz = ConsoleDataVisz()
-    dc.addCallback(visz)
+    visz = consoleViszualization.ConsoleDataVisz()
+    #dc.addCallback(visz)
+
+    imgCreator = imageCreator.ImageCreator(120, os.getcwd())
+    dc.addCallback(imgCreator)
+
     dc.start()
     httpd.start()
 
