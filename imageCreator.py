@@ -53,10 +53,9 @@ class ImageCreator(DataCollectorCallback):
         fig = plt.gcf()
         fig.set_size_inches(10, 5)
         ax.legend_.remove()
-        plt.savefig(os.path.join(self.imagePath, "graphHeatResorvoir.png"))
+        plt.savefig(os.path.join(self.imagePath, "graphAllValues.png"))
 
-        print(list(df_plot))
         fig_legend = plt.figure(figsize=(3.5, 1.5))
-        fig_legend.legend(ax.get_lines(), list(df_plot), loc='center', frameon=False)
-        plt.savefig(os.path.join(self.imagePath, "graphHeatResorvoirLegend.png"))
+        fig_legend.legend(ax.get_lines(), [x.replace(".value", "").replace("data.", "") for x in list(df_plot)], loc='center', frameon=False)
+        plt.savefig(os.path.join(self.imagePath, "graphAllValuesLegend.png"))
 
