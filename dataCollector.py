@@ -164,7 +164,7 @@ def main():
     visz = consoleViszualization.ConsoleDataVisz()
     #dc.addCallback(visz)
 
-    imgCreator = imageCreator.ImageCreator(120, os.getcwd())
+    imgCreator = imageCreator.ImageCreator(24*60*60, "/mnt/ramdsk")
     dc.addCallback(imgCreator)
 
     dc.start()
