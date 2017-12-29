@@ -4,6 +4,7 @@ import sensor
 import time
 import os
 import threading
+import importlib
 
 import httpProvider
 import dataLogger
@@ -26,6 +27,8 @@ if "LOGGER_DIR" in os.environ.keys():
 
 
 SENSOR_PATHS = dict()
+SENSOR_PATHS["DG_Return_to_HeatResorvoir"] = "28-000005297288"
+SENSOR_PATHS["HeatResorvoir_to_DG_Return"] = "28-00000529d053"
 SENSOR_PATHS["DG_Lead"] = "28-00000529cf95"
 SENSOR_PATHS["DG_Return"] = "28-0000052997b1"
 SENSOR_PATHS["EG_Lead"] = "28-000005298431"
@@ -108,6 +111,8 @@ class DataCollector(threading.Thread):
 
             try:
                 start = time.time()
+                
+                importlib.reload(imageCreator)
 
                 # query sensors
                 for k in self.sensors.keys():
