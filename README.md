@@ -27,9 +27,17 @@ dtoverlay=w1-gpio,gpiopin=4
 dtoverlay=w1-gpio,gpiopin=17
 ```
 
+Activate i2c and spi:
+Link: http://www.netzmafia.de/skripten/hardware/RasPi/RasPi_I2C.html
+# /boot/config.txt
+dtparam=i2c1=on
+dtparam=i2c_arm=on
+dtparam=spi=on
+
+
 Reboot!
 
-### RAM Disk
+### RAM Diskasdf
 Sources:
 * http://www.kriwanek.de/index.php/de/raspberry-pi/265-ram-disk-auf-raspberry-pi-einrichten
 
