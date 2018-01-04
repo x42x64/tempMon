@@ -86,12 +86,13 @@ class DataCollector(threading.Thread):
         testSensorPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_device", "w1_slave")
         self.sensors["HeatResorvoir2a"] = sensor.ds1820(testSensorPath)
         self.sensors["HeatResorvoirReturnBoiler"] = sensor.ds1820(testSensorPath)
-        self.sensors["Ambient"]= sensor.ds1820(testSensorPath)
         self.sensors["Outside"] = sensor.ds1820(testSensorPath)
         self.sensors["Collector"] = sensor.ds1820(testSensorPath)
 
         # Only use real sensors if HTTP Server is not on loopback
         if HTTP_IP != "127.0.0.1":
+            self.sensors["Ambient"] = sensor.bmp280Temp()
+            self.sensors["AmbientPressure"] = sensor.bmp280Pressure()
             for k in SENSOR_PATHS.keys():
                 self.sensors[k] = sensor.ds1820(getW1Path(SENSOR_PATHS[k]))
 
