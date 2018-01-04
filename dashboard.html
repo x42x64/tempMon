@@ -7,8 +7,15 @@
 <body>
 
 <h1>Heizung Dashboard</h1>
+<h2>Active Sensors</h2>
 <p id="tableActive"></p>
-<p><img src="graphHeatResorvoir.png" /></p>
+<h2>Many Sensors</h2>
+<p><img src="graphHeatResorvoir.png" /><img src="graphHeatResorvoirLegend.png"/></p>
+	<h2>Heat Resorvoir Sensors</h2>
+	<p><img id="graphAllValues" src="graphAllValues.png" /> <img src="graphAllValuesLegend.png"/></p>
+	<h2>Heat Circuits Sensors</h2>
+	<p><img id="graphHeaterCircuits" src="HeaterCircuits.png" /> <img src="HeaterCircuitsLegend.png"/></p>
+<h2>Inactive Sensors</h2>
 <p id="tableInactive"></p>
 <script>
 
@@ -45,6 +52,8 @@ xhttp.onreadystatechange = function() {
 function querySensors(){ 
     xhttp.open("GET", "http://192.168.178.54:8081", true);
     xhttp.send(); 
+    document.getElementById('graphAllValues').src = "graphAllValues.png?random="+new Date().getTime();
+    document.getElementById('graphHeaterCircuits').src = "HeaterCircuits.png?random="+new Date().getTime();
 }
 
 setInterval(querySensors, 15000);
