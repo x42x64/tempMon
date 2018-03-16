@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 class SpectrumAnalyzer:
     FORMAT = pyaudio.paFloat32
     CHANNELS = 1
-    RATE = 16000
+    RATE = 48000
     CHUNK = 512
     START = 0
     N = 512
@@ -18,15 +18,25 @@ class SpectrumAnalyzer:
     spec_x_aggr = None
     spec_y_aggr = None
     data = []
+    sim = False
+    wf = None
 
-    def __init__(self):
-        self.pa = pyaudio.PyAudio()
-        self.stream = self.pa.open(format = self.FORMAT,
-            channels = self.CHANNELS,
-            rate = self.RATE,
-            input = True,
-            output = False,
-            frames_per_buffer = self.CHUNK)
+    def __init__(self, sim=False):
+        self.sim = sim
+
+
+        if not sim:
+            self.pa = pyaudio.PyAudio()
+            self.stream = self.pa.open(format = self.FORMAT,
+                channels = self.CHANNELS,
+                rate = self.RATE,
+                input = True,
+                output = False,
+                frames_per_buffer = self.CHUNK)
+        else:
+            import wave
+            self.wf = wave.open('heizung_pi.wav','rb')
+
         # Main loop
         self.loop()
 
@@ -35,12 +45,18 @@ class SpectrumAnalyzer:
             i = 0
             while True :
                 self.data = self.audioinput()
+                if not self.data.any():
+                    break
+
                 self.fft()
-                self.update_aggregate(0.01)
-                if i%10 == 0:
-                    pass#self.graphplot()
-                self.consoleOut()
+                self.update_aggregate(0.005)
+                if i%50 == 0:
+                    self.graphplot()
+                    print("Stream time: " + str(float(i) / self.RATE * self.CHUNK))
+                    self.consoleOut()
                 i=i+1
+
+
 
         except KeyboardInterrupt:
             self.pa.close()
@@ -48,8 +64,14 @@ class SpectrumAnalyzer:
         print("End...")
 
     def audioinput(self):
-        ret = self.stream.read(self.CHUNK)
-        ret = np.fromstring(ret, np.float32)
+        if self.sim:
+            ret = self.wf.readframes(self.CHUNK)
+            sw = self.wf.getsampwidth()
+            ret = np.fromstring(ret, np.int16).astype(dtype=np.float32)/32768.0
+        else:
+            ret = self.stream.read(self.CHUNK)
+            ret = np.fromstring(ret, np.float32)
+        ret = ret - np.mean(ret)
         return ret
 
     def fft(self):
@@ -76,18 +98,17 @@ class SpectrumAnalyzer:
         #Spectrum
         plt.subplot(312)
         plt.plot(self.spec_x, self.spec_y_aggr, marker= 'o', linestyle='-')
-        plt.axis([0, self.RATE / 2, 0, 50])
+        plt.axis([0, 1000, 0, 2])
         plt.xlabel("frequency [Hz]")
         plt.ylabel("amplitude spectrum")
         #Pause
         plt.pause(.01)
 
     def consoleOut(self):
-        if np.max(self.spec_y_aggr) > 10:
-            idx = np.argmax(self.spec_y)
-            print("Max frequency at " + str(self.spec_x[idx]))
+        if self.spec_y_aggr[4] > 0.65:
+            print("on")
         else:
-            pass #print("None")
+            print("off")
 
 if __name__ == "__main__":
     p = pyaudio.PyAudio()
@@ -97,4 +118,4 @@ if __name__ == "__main__":
         if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
             print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
 
-    spec = SpectrumAnalyzer()
+    spec = SpectrumAnalyzer(sim=True)
