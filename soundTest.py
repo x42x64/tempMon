@@ -1,5 +1,8 @@
 import numpy as np
 import pyaudio
+import time
+
+import soundProcessor
 
 #import matplotlib.pyplot as plt
 
@@ -122,5 +125,15 @@ if __name__ == "__main__":
     #    if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
     #        print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
 
-    spec = SpectrumAnalyzer(sim=True)
+    #spec = SpectrumAnalyzer(sim=True)
 
+    sp1 = soundProcessor.soundProcessor()
+    sp2 = soundProcessor.soundProcessor()
+    sp3 = soundProcessor.soundProcessor()
+
+    for _ in range(40):
+        print(str(sp1.get_heater_state()) + " " +
+              str(sp2.get_fft(3)) + " " +
+              str(sp3.get_fft(4)) )
+
+        time.sleep(5)
