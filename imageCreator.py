@@ -49,17 +49,17 @@ class ImageCreator(DataCollectorCallback):
             self.saveImages("HeaterCircuits", self.dfRingBuffer[keys])
 
             keys = ["data.HeaterActive.value", "data.noiseFFT_3.value", "data.noiseFFT_4.value"]
-            self.saveImages("HeaterActivity", self.dfRingBuffer[keys])
+            self.saveImages("HeaterActivity", self.dfRingBuffer[keys], [0, 1.1])
 
 
-    def saveImages(self, name, df):
+    def saveImages(self, name, df, ylim = [10.0, 60.0]):
         keys = [x for x in list(df) if ".value" in x]
         df_plot = df[keys]
         ax = df_plot.plot()
         ax.grid(True)
         plt.ylabel("°C")
         plt.xlabel("UTC time (m-d h)")
-        ax.set_ylim([10.0, 60.0])
+        ax.set_ylim(ylim)
         fig = plt.gcf()
         fig.set_size_inches(10, 5)
         ax.legend_.remove()
