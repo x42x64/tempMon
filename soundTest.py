@@ -1,12 +1,12 @@
 import numpy as np
 import pyaudio
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 class SpectrumAnalyzer:
     FORMAT = pyaudio.paFloat32
     CHANNELS = 1
-    RATE = 16000
+    RATE = 48000
     CHUNK = 512
     START = 0
     N = 512
@@ -26,7 +26,9 @@ class SpectrumAnalyzer:
             rate = self.RATE,
             input = True,
             output = False,
-            frames_per_buffer = self.CHUNK)
+            frames_per_buffer = self.CHUNK,
+            input_device_index = 2
+            )
         # Main loop
         self.loop()
 
@@ -36,19 +38,19 @@ class SpectrumAnalyzer:
             while True :
                 self.data = self.audioinput()
                 self.fft()
-                self.update_aggregate(0.01)
+                self.update_aggregate(0.005)
                 if i%10 == 0:
                     pass#self.graphplot()
                 self.consoleOut()
                 i=i+1
 
         except KeyboardInterrupt:
-            self.pa.close()
+            self.pa.close(self.stream)
 
         print("End...")
 
     def audioinput(self):
-        ret = self.stream.read(self.CHUNK)
+        ret = self.stream.read(self.CHUNK, exception_on_overflow=False)
         ret = np.fromstring(ret, np.float32)
         return ret
 
@@ -65,36 +67,36 @@ class SpectrumAnalyzer:
 
         self.spec_y_aggr = self.spec_y_aggr * (1.0-phi) + self.spec_y * phi
 
-    def graphplot(self):
-        plt.clf()
-        # wave
-        plt.subplot(311)
-        plt.plot(self.wave_x, self.wave_y)
-        plt.axis([self.START, self.START + self.N, -0.5, 0.5])
-        plt.xlabel("time [sample]")
-        plt.ylabel("amplitude")
-        #Spectrum
-        plt.subplot(312)
-        plt.plot(self.spec_x, self.spec_y_aggr, marker= 'o', linestyle='-')
-        plt.axis([0, self.RATE / 2, 0, 50])
-        plt.xlabel("frequency [Hz]")
-        plt.ylabel("amplitude spectrum")
-        #Pause
-        plt.pause(.01)
+#    def graphplot(self):
+#        plt.clf()
+#        # wave
+#        plt.subplot(311)
+#        plt.plot(self.wave_x, self.wave_y)
+#        plt.axis([self.START, self.START + self.N, -0.5, 0.5])
+#        plt.xlabel("time [sample]")
+#        plt.ylabel("amplitude")
+#        #Spectrum
+#        plt.subplot(312)
+#        plt.plot(self.spec_x, self.spec_y_aggr, marker= 'o', linestyle='-')
+#        plt.axis([0, self.RATE / 2, 0, 50])
+#        plt.xlabel("frequency [Hz]")
+#        plt.ylabel("amplitude spectrum")
+#        #Pause
+#        plt.pause(.01)
 
     def consoleOut(self):
-        if np.max(self.spec_y_aggr) > 10:
-            idx = np.argmax(self.spec_y)
-            print("Max frequency at " + str(self.spec_x[idx]))
-        else:
-            pass #print("None")
+        print(self.spec_y_aggr[0:6])
+        #if self.spec_y_aggr[4] > 0.65:
+        #    print("On")
+        #else:
+        #    print("Off")
 
 if __name__ == "__main__":
     p = pyaudio.PyAudio()
     info = p.get_host_api_info_by_index(0)
     numdevices = info.get('deviceCount')
-    for i in range(0, numdevices):
-        if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-            print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
+    #for i in range(0, numdevices):
+    #    if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+    #        print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
 
     spec = SpectrumAnalyzer()
