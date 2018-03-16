@@ -48,7 +48,7 @@ class ds1820(sensor):
         except:
             print("Could not read sensor " + self.path)
 
-class bmp280Temp():
+class bmp280Temp(sensor):
 
     def __init__(self):
         sensor.__init__(self)
@@ -59,7 +59,7 @@ class bmp280Temp():
         self.value, _ = self.bmp280.get_temperature_and_pressure()
 
 
-class bmp280Pressure():
+class bmp280Pressure(sensor):
     def __init__(self):
         sensor.__init__(self)
         self.unit = "kPa"
