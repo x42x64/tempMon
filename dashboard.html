@@ -37,9 +37,9 @@ xhttp.onreadystatechange = function() {
        for (var x in sortedKeys)
        {
             if (temperatureObj[sortedKeys[x]].value <= -255) {
-                tbl_inactive += "<tr><td>" + sortedKeys[x] + "</td><td>" + temperatureObj[sortedKeys[x]].value + "°C" + "</td></tr>";
+                tbl_inactive += "<tr><td>" + sortedKeys[x] + "</td><td>" + temperatureObj[sortedKeys[x]].value.toFixed(2) + " " + temperatureObj[sortedKeys[x]].unit + "</td></tr>";
             } else {
-                tbl_active += "<tr><td>" + sortedKeys[x] + "</td><td>" + temperatureObj[sortedKeys[x]].value + "°C" + "</td></tr>";
+                tbl_active += "<tr><td>" + sortedKeys[x] + "</td><td>" + temperatureObj[sortedKeys[x]].value.toFixed(2) + " " + temperatureObj[sortedKeys[x]].unit + "</td></tr>";
             }  
        }
        tbl_active += "</table>";
