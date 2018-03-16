@@ -1,5 +1,6 @@
 import time
 import BMP280
+import soundProcessor
 
 class sensor:
 
@@ -68,7 +69,26 @@ class bmp280Pressure(sensor):
     def querySensor(self):
         _, self.value = self.bmp280.get_temperature_and_pressure()
 
+class heaterActive(sensor):
+    def __init__(self):
+        sensor.__init__(self)
+        self.unit = "-"
+        self.soundProcessor = soundProcessor.soundProcessor()
 
+    def querySensor(self):
+        self.value = self.soundProcessor.get_heater_state()
+        self.ts = self.soundProcessor.get_last_update_time()
+
+class noiseFFT(sensor):
+    def __init__(self, fft_idx):
+        sensor.__init__(self)
+        self.unit = "-"
+        self.soundProcessor = soundProcessor.soundProcessor()
+        self.fft_idx = fft_idx
+
+    def querySensor(self):
+        self.value = self.soundProcessor.get_fft(self.fft_idx)
+        self.ts = self.soundProcessor.get_last_update_time()
 
 
 

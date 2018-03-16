@@ -93,6 +93,10 @@ class DataCollector(threading.Thread):
         if HTTP_IP != "127.0.0.1":
             self.sensors["Ambient"] = sensor.bmp280Temp()
             self.sensors["AmbientPressure"] = sensor.bmp280Pressure()
+            self.sensors["HeaterActive"] = sensor.heaterActive()
+            self.sensors["noiseFFT_3"] = sensor.noiseFFT(3)
+            self.sensors["noiseFFT_4"] = sensor.noiseFFT(4)
+
             for k in SENSOR_PATHS.keys():
                 self.sensors[k] = sensor.ds1820(getW1Path(SENSOR_PATHS[k]))
 
