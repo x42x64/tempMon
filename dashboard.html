@@ -56,6 +56,7 @@ function querySensors(){
     xhttp.send(); 
     document.getElementById('graphAllValues').src = "graphAllValues.png?random="+new Date().getTime();
     document.getElementById('graphHeaterCircuits').src = "HeaterCircuits.png?random="+new Date().getTime();
+    document.getElementById('graphHeaterCircuits').src = "HeaterActivity.png?random="+new Date().getTime();
 }
 
 setInterval(querySensors, 15000);
