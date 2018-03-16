@@ -48,6 +48,9 @@ class ImageCreator(DataCollectorCallback):
             keys = ["data.DG_Lead.value", "data.DG_Return.value", "data.EG_Lead.value", "data.EG_Return.value", "data.HeatResorvoir_Lead.value", "data.HeatResorvoir_Return.value", "data.Heater_Lead.value", "data.Heater_Return.value"]
             self.saveImages("HeaterCircuits", self.dfRingBuffer[keys])
 
+            keys = ["data.HeaterActive.value", "data.noiseFFT_3.value", "data.noiseFFT_4.value"]
+            self.saveImages("HeaterActivity", self.dfRingBuffer[keys])
+
 
     def saveImages(self, name, df):
         keys = [x for x in list(df) if ".value" in x]
@@ -60,6 +63,7 @@ class ImageCreator(DataCollectorCallback):
         fig = plt.gcf()
         fig.set_size_inches(10, 5)
         ax.legend_.remove()
+
         plt.savefig(os.path.join(self.imagePath, name+".png"))
 
         fig_legend = plt.figure(figsize=(3.5,4.5))
