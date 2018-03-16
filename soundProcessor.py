@@ -57,9 +57,9 @@ class soundProcessor:
         def __update(self):
             if not self.last_update or (time.time() - self.last_update) > 10.0:
                 for _ in range(20):
-                    self.data = self.audioinput()
-                    self.fft()
-                    self.update_aggregate(0.05)
+                    self.data = self.__audioinput()
+                    self.__fft()
+                    self.__update_aggregate(0.05)
                 self.last_update = time.time()
 
         def get_fft(self, idx):
