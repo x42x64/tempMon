@@ -134,7 +134,7 @@ class DataCollector(threading.Thread):
                     cb.onData(self.data)
 
                 duration = time.time() - start
-                time.sleep(30.0 - duration)
+                time.sleep(max(30.0 - duration, 1.0))
 
             except:
                 raise
