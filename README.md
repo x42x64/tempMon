@@ -68,3 +68,58 @@ See also: https://crontab.guru/#12_*/2_*_*_*
 ```
 12 */2 * * * /home/pi/projects/heizung/mv2loggingstorage.sh
 ```
+
+### Setup for autostart
+See: https://www.stuffaboutcode.com/2012/06/raspberry-pi-run-program-at-start-up.html
+
+create a service script which runs the run.sh script as pi user.
+Use sudo -u in order to run as different user.
+Watch the pkill argument on how to stop the service.
+Script:
+```
+#! /bin/sh
+# /etc/init.d/heizung
+
+### BEGIN INIT INFO
+# Provides:          heizung
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Simple script to start a program at boot
+# Description:       A simple script from www.stuffaboutcode.com which will sta$
+### END INIT INFO
+
+# If you want a command to always run, put it here
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+  start)
+    echo "Starting heizung"
+    # run application you want to start
+    sudo -u pi /home/pi/projects/heizung/run.sh&
+    ;;
+  stop)
+    echo "Stopping heizung"
+    # kill application you want to stop
+    pkill -f "python3.*dataCollector.py"
+    ;;
+  *)
+    echo "Usage: /etc/init.d/heizung {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0 
+
+```
+
+Register the script on startup:
+```
+sudo update-rc.d heizung defaults
+```
+Unregister the script from startup:
+```
+sudo update-rc.d -f heizung remove
+```
+
