@@ -52,7 +52,7 @@ xhttp.onreadystatechange = function() {
 };
 
 function querySensors(){ 
-    xhttp.open("GET", "http://192.168.178.54:8081", true);
+    xhttp.open("GET", "http://raspberrypi:8081", true);
     xhttp.send(); 
     document.getElementById('graphAllValues').src = "graphAllValues.png?random="+new Date().getTime();
     document.getElementById('graphHeaterCircuits').src = "HeaterCircuits.png?random="+new Date().getTime();
